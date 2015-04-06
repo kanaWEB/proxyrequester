@@ -1,16 +1,7 @@
 <?php
 //Based on #http://stackoverflow.com/questions/5647461/how-do-i-send-a-post-request-with-php
-include("gump.class.php");
-
-if (isset($_GET["action"])) {
-    //echo $_GET["action"];
-
-    $action = sanitizeAction($_GET["action"]);
-    if($action !== false){
-        $result = action($action);
-        //var_dump($result);
-    }
-}
+require("lib/gump.class.php");
+require("secret.php");
 
 function webRequest($url, $post_data){
     $options = array(
@@ -25,7 +16,12 @@ function webRequest($url, $post_data){
     //var_dump($post_data);
     //var_dump($url);
 
-    $result = file_get_contents($url, false, $context);
+    $result = @file_get_contents($url, false, $context);
+    if($result === false){
+        $error = error_get_last();
+        echo "<h1>Cannot connect to server</h1>";
+        echo "<code>".$error["message"]."</code>";
+    }
     $result = json_decode($result);
     return $result;
 }
@@ -34,7 +30,7 @@ function sanitizeAction($action) {
     $action_array = explode(";",$action);
     
     if(count($action_array) != 4) {
-        echo "Invalid Action";
+        echo "<code>Invalid Action</code>";
         return false;
     }
     else
